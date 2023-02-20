@@ -66,6 +66,7 @@ SSTAR_GFX_ROTATE开启为1时，fbdev.ini下的宽高与lvgl的disp_drv.hor_res�
   lv_conf.h                 // lvgl 配置文件
   lv_drv_conf.h             // lv_drivers 配置文件
   main.c                    // 主函数文件
+  src                       //802代码
   Makefile                  // Makefile
   README.md                 // README
 ```
