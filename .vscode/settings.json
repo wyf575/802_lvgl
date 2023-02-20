@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "appconfig.h": "c",
+        "main_app.h": "c",
+        "sstar_fbdev.h": "c",
+        "sstar_disp.h": "c",
+        "sstar_port.h": "c",
+        "lvgl.h": "c",
+        "evdev.h": "c",
+        "lv_draw_sw.h": "c",
+        "lv_conf.h": "c",
+        "mi_panel_datatype.h": "c",
+        "mi_disp_datatype.h": "c",
+        "mainwindow.h": "c",
+        "lv_obj.h": "c",
+        "lv_label.h": "c",
+        "convert_from_argb.h": "c",
+        "jsonparse.h": "c",
+        "restclient.h": "c",
+        "mediaplayer.h": "c",
+        "module4gmanager.h": "c",
+        "downloadmanager.h": "c",
+        "json.h": "c",
+        "json_app.h": "c",
+        "mqtt_client.h": "c",
+        "tc_rotate.h": "c",
+        "lv_demo_widgets.h": "c"
+    }
+}

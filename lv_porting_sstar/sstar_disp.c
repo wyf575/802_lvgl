@@ -13,7 +13,7 @@
 #include "sstar_disp.h"
 
 #ifdef CHIP_i2m
-#include "SAT070CP50_TTL_1024x600.h"
+#include "./panel/SAT070CP50_TTL_1024x600.h"
 #endif
 
 #ifndef SSTAR_DISP_DEV

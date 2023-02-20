@@ -12,7 +12,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
-#include "lvgl.h"
+#include "../lvgl/src/lvgl.h"
 #include "lv_conf.h"
 
 #include "sstar_fbdev.h"

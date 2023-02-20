@@ -1,0 +1,1 @@
+CSRCS += $(shell find -L $(LVGL_DIR)/$(SRC_NAME)/ -name \*.c)

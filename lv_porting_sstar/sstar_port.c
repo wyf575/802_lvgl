@@ -7,15 +7,14 @@
 #include <linux/fb.h>
 #include <linux/input.h>
 
-#include "lvgl.h"
+#include "../lvgl/src/lvgl.h"
 
-#include "evdev.h"
+#include "../lv_drivers/indev/evdev.h"
 #include "lv_conf.h"
 #include "lv_draw_sw.h"
 
 #include "sstar_sys.h"
 #include "sstar_memory.h"
-#include "sstar_disp.h"
 #include "sstar_fbdev.h"
 #include "sstar_gfx.h"
 #include "sstar_port.h"
@@ -156,9 +155,9 @@ int sstar_lv_init(void)
     if (0 != sstar_fbdev_init()) {
         goto ERR_FBDEV_INIT;
     }
-    if (0 != sstar_disp_init(0, "ttl", 1024, 600)) {
-        goto ERR_DISP_INIT;
-    }
+    //if (0 != sstar_disp_init(0, "ttl", 1024, 600)) {
+    //    goto ERR_DISP_INIT;
+    //}
     if (0 != sstar_gfx_init()) {
         goto ERR_GFX_INIT;
     }
@@ -168,8 +167,8 @@ int sstar_lv_init(void)
     lvgl_disp_drv_init();
     return 0;
 ERR_GFX_INIT:
-    sstar_disp_deinit(0, "ttl");
-ERR_DISP_INIT:
+//   sstar_disp_deinit(0, "ttl");
+//ERR_DISP_INIT:
     sstar_fbdev_deinit();
 ERR_FBDEV_INIT:
     sstar_sys_deinit();
@@ -183,7 +182,7 @@ void sstar_lv_deinit(void)
 
     sstar_gfx_deinit();
     sstar_fbdev_deinit();
-    sstar_disp_deinit(0, "ttl");
+    //sstar_disp_deinit(0, "ttl");
     sstar_pool_free();
     sstar_sys_deinit();
 }

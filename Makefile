@@ -1,96 +1,173 @@
-#
-# Makefile
-#
-#CC := gcc
-#CC := aarch64-linux-gnu-gcc
-CC := arm-linux-gnueabihf-gcc
-LVGL_DIR ?= .
-LVGL_DIR_NAME ?= lvgl
+CC= arm-linux-gnueabihf-gcc
+CPP = arm-linux-gnueabihf-g++ 
 
-#WARNINGS = -Werror -Wall -Wextra \
-#           -Wshadow -Wundef -Wmaybe-uninitialized -Wmissing-prototypes -Wpointer-arith -Wuninitialized \
-#           -Wunreachable-code -Wreturn-type -Wmultichar -Wformat-security -Wdouble-promotion -Wclobbered -Wdeprecated  \
-#           -Wempty-body -Wstack-usage=2048 \
-#           -Wtype-limits -Wsizeof-pointer-memaccess
+#配置源文件目录
+PROJ_ROOT_PATH  :=./
+#源文件后缀名
+PROJ_SRC_SUFFIX := %.cpp %.c
+PROJ_HEAD_SUFFIX := %.h
+# 递归遍历目录下的所有的文件 
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))  
+# 获取相应的源文件
+PROJ_ALL_FILES := $(foreach src_path,$(PROJ_ROOT_PATH), $(call rwildcard,$(src_path),*.*) )   
+PROJ_SRC_FILES := $(filter $(PROJ_SRC_SUFFIX),$(PROJ_ALL_FILES))   
+PROJ_HEAD_FILES := $(filter $(PROJ_HEAD_SUFFIX),$(PROJ_ALL_FILES))   
 
-#-Wno-unused-value -Wno-unused-parameter 
-OPTIMIZATION ?= -O3 -mfpu=neon #-g -fno-omit-frame-pointer 
+# 获取相应的源文件
+LOCAL_SRC_FILES  := $(PROJ_SRC_FILES) 
+LOCAL_HEAD_FILES := $(PROJ_HEAD_FILES) 
 
-ALKAID_PROJ := ../project
+#源文件目录结构
+PROJ_DIR_TREE := $(dir $(foreach src_path, $(LOCAL_SRC_FILES), $(call rwildcard,$(src_path),*/) ) )  
+PROJ_DIR_TREE := $(sort $(PROJ_DIR_TREE))  
 
-include $(ALKAID_PROJ)/configs/current.configs
+#player功能启用开关
+CONFIG_PLAYER_SWITCH := "enable"
+#CONFIG_PLAYER_SWITCH :=
 
-CFLAGS ?= -I$(LVGL_DIR)/ $(DEFINES) $(WARNINGS) $(OPTIMIZATION)
-CFLAGS += -I$(LVGL_DIR)/$(LVGL_DIR_NAME)
-CFLAGS += -I$(LVGL_DIR)/lv_drivers/indev/
-CFLAGS += -I$(LVGL_DIR)/lvgl/demos/
-CFLAGS += -I$(LVGL_DIR)/lv_porting_sstar/
-CFLAGS += -I$(LVGL_DIR)/squareline_proj
+#cloudplay功能启用开关
+CONFIG_CLOUD_PLAY_SWITCH := "enable"
+#CONFIG_CLOUD_PLAY_SWITCH :=
 
-CFLAGS += -I$(PROJ_ROOT)/release/include/
+#myplayer多进程功能启用开关
+CONFIG_MULTIPROC_SWITCH := "enable"
+#CONFIG_MULTIPROC_SWITCH :=
+OBJS_ROOT_DIR=./obj/
+OBJS_1 = $(patsubst %.cpp,%.o,$(LOCAL_SRC_FILES))
+OBJS_2 = $(patsubst %.c,%.o,$(OBJS_1))
+OBJS   = $(addprefix $(OBJS_ROOT_DIR), $(OBJS_2))
+OBJS_DIR_TREE=$(addprefix $(OBJS_ROOT_DIR),$(PROJ_DIR_TREE))
 
-CFLAGS += -DCHIP_$(CHIP)
+CFLAGS=-O3 -mfpu=neon#-Os -pipe  -fno-caller-saves -Wno-unused-result -Wno-format-truncation -Wno-write-strings -mfloat-abi=hard -mfpu=vfp -Wformat -Werror=return-type -Werror=format-security -fstack-protector -D_FORTIFY_SOURCE=1 -Wl,-z,now -Wl,-z,relro -Wl,--warn-common -Wl,--warn-once -Wl,-z,combreloc -Wl,-z,defs
+CXXFLAGS=-O3 -mfpu=neon#-Os -pipe  -fno-caller-saves -Wno-unused-result -Wno-format-truncation -Wno-write-strings -mfloat-abi=hard -mfpu=vfp -Wformat -Werror=return-type -Werror=format-security -fstack-protector -D_FORTIFY_SOURCE=1 -Wl,-z,now -Wl,-z,relro -Wl,-z,defs 
+CXXFLAGS+= -fpermissive#-fexceptions -fpermissive -Wall -O2
 
-ifeq ($(CHIP),i2m)
-LDFLAGS += -L $(ALKAID_PROJ)/release/$(PRODUCT)/$(CHIP)/common/$(TOOLCHAIN)/$(TOOLCHAIN_VERSION)/mi_libs/dynamic
-LDFLAGS += -L $(ALKAID_PROJ)/release/$(PRODUCT)/$(CHIP)/common/$(TOOLCHAIN)/$(TOOLCHAIN_VERSION)/ex_libs/dynamic
-CFLAGS += -I./lv_porting_sstar/panel
-else
-LDFLAGS += -L $(ALKAID_PROJ)/release/chip/$(CHIP)/$(PRODUCT)/common/$(TOOLCHAIN)/$(TOOLCHAIN_VERSION)/mi_libs/dynamic
-LDFLAGS += -L $(ALKAID_PROJ)/release/chip/$(CHIP)/$(PRODUCT)/common/$(TOOLCHAIN)/$(TOOLCHAIN_VERSION)/ex_libs/dynamic
-LDFLAGS += -L $(ALKAID_PROJ)/release/chip/$(CHIP)/sigma_common_libs/$(TOOLCHAIN)/$(TOOLCHAIN_VERSION)/dynamic
+STATIC_LIB = ./src/curl/libcurl.a ./src/openssl/libssl.a ./src/openssl/libcrypto.a ./src/zlib/libz.a
+
+	
+INCLUDE_DIR := 	-I. \
+				-I ./src \
+				-I ./src/include \
+				-I ./src/sdkdir/include \
+				-I ./src/voicedetect \
+				-I ./src/tts \
+				-I ./src/rtsp/include	\
+				-I ./src/rtsp	\
+				-I ./src/airplay/include \
+				-I ./src/nz3802 \
+				-I ./src/lv_ui \
+				-I ./src/main_app \
+				-I ./src/main_app/platform 
+				
+		
+LDFLAGS = -pthread -lmi_sys -lmi_disp -lmi_panel -lmi_ao -lmi_gfx -lmi_divp -lmi_vdec -lmi_common -lmi_wlan -lcjson -lmi_ai -lssl -lcrypto -ldl -lrt -lmosquitto
+LDFLAGS += 	-L. \
+			-L ./src/sdkdir/lib \
+			-L./src \
+			-L./src/3rdlib \
+
+
+		
+
+INCLUDE_DIR += 	-I ./src/player \
+				-I ./src/player/ffmpeg \
+				-I ./src/player/ffmpeg/include \
+				-I ./src/player/mediastream \
+				-I ./src/player/imagedata	\
+				-I ./src/v4l2/inc \
+				-I ./src/v4l2/inc/uvc \
+				-I ./src/v4l2/inc/video \
+				-I ./src/v4l2/src \
+				-I ./src/v4l2/src/control \
+				-I ./src/v4l2/src/gcc \
+				-I ./src/v4l2/src/libv4l \
+				-I ./src/v4l2/src/processing \
+				-I ./src/hotplugdetect \
+				-I ./src/hotplugdetect/common \
+				-I ./src/hotplugdetect/usbdetect \
+				-I ./src/hotplugdetect/wifidetect \
+				-I ./src/hotplugdetect/wirednetworkdetect \
+				-I ./src/jsoncpp/include \
+				-I ./src/jsoncpp/ \
+				-I ./src/model \
+				-I ./src/io 
+
+
+INCLUDE_DIR +=  -I ./lvgl/demos \
+				-I ./lvgl \
+				-I ./lv_drivers/indev \
+ 				-I ./lvgl/src \
+				-I ./lvgl/src/core \
+				-I ./lvgl/src/draw \
+				-I ./lvgl/src/draw/sw \
+				-I ./lvgl/src/extra \
+				-I ./lvgl/src/font \
+				-I ./lvgl/src/gpu \
+				-I ./lvgl/src/hal \
+				-I ./lvgl/src/misc \
+				-I ./lvgl/src/widgets \
+				-I ./lv_porting_sstar 
+
+ifneq ($(CONFIG_PLAYER_SWITCH),)
+CFLAGS+=-DSUPPORT_PLAYER_MODULE
+CXXFLAGS+=-DSUPPORT_PLAYER_MODULE
 endif
 
-LDFLAGS += -lpthread
-LDFLAGS += -lcam_os_wrapper -lcam_fs_wrapper -lmi_sys -lmi_common -lmi_panel -lmi_disp -lmi_gfx -lm 
+ifneq ($(CONFIG_CLOUD_PLAY_SWITCH),)
+CFLAGS+=-DSUPPORT_CLOUD_PLAY_MODULE
+CXXFLAGS+=-DSUPPORT_CLOUD_PLAY_MODULE
+endif
 
-BIN ?= demo
+ifneq ($(CONFIG_MULTIPROC_SWITCH),)
+CFLAGS+=-DSUPPORT_PLAYER_PROCESS
+CXXFLAGS+=-DSUPPORT_PLAYER_PROCESS
+else
+LDFLAGS += -lavformat -lavcodec -lavutil -lswscale -lswresample -L./src/player/ffmpeg/lib
+endif
+CFLAGS+=-DCHIP_i2m
+CXXFLAGS+=-DCHIP_i2m
+TARGET=lvgl_app_802
 
-#Collect the files to compile
+ifeq ($(TARGET), $(wildcard $(TARGET)))
+	DELETE_TARGET=$(TARGET)
+endif
 
-include lvgl/lvgl.mk
-include lv_drivers/lv_drivers.mk
-include lv_porting_sstar/lv_porting_sstar.mk
-include squareline_proj/squareline_proj.mk
+# alias commads if compile on windows
+RM =rm
+MKDIR=mkdir
+ECHO=echo
+#alias end
 
-CSRCS += main.c
+all:   $(TARGET)
+	@$(ECHO)
+	@$(ECHO) "[armeabi] Install        : $(TARGET)"
+	
 
-BUILD_DIR := $(LVGL_DIR)/build/
-OBJ_DIR = $(BUILD_DIR)/obj/
-BIN_DIR = $(BUILD_DIR)/bin/
+$(OBJS_ROOT_DIR)%.o: %.cpp $(LOCAL_HEAD_FILES)
+	@$(ECHO) "[armeabi] Compile++      : "$< 
+	@-$(MKDIR) $(OBJS_DIR_TREE) -p 
+	@$(CPP) -c $< -o $@ $(CXXFLAGS) $(INCLUDE_DIR) $(LDFLAGS) 
+	
+$(OBJS_ROOT_DIR)%.o: %.c $(LOCAL_HEAD_FILES)
+	@$(ECHO) "[armeabi] Compile      : "$< 
+	@-$(MKDIR) $(OBJS_DIR_TREE) -p 
+	@$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_DIR) $(LDFLAGS)
 
-OBJEXT ?= .o
-AOBJS = $(addprefix $(OBJ_DIR),$(ASRCS:.S=$(OBJEXT)))
-COBJS = $(addprefix $(OBJ_DIR),$(CSRCS:.c=$(OBJEXT)))
-DEPS = $(addprefix $(OBJ_DIR),$(CSRCS:.c=.d))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-.PHONY: all env clean default
-all: env default
-
--include $(DEPS)
-
-env:
-	@echo "Building env......."
-	@if [ ! -d "$(BUILD_DIR)" ]; then mkdir -p $(BUILD_DIR); fi
-	@if [ ! -d "$(OBJ_DIR)" ]; then mkdir -p $(OBJ_DIR); fi
-	@if [ ! -d "$(BIN_DIR)" ]; then mkdir -p $(BIN_DIR); fi
-
-$(OBJ_DIR)main.o: main.c
-	@echo "Compiling $(LVGL_DIR)/$<"
-	@$(CC)  $(CFLAGS) -c $< -o $@
-
-$(OBJ_DIR)%.o: %.c
-	@echo "Compiling $<"
-	@mkdir -p $(OBJ_DIR)$(dir $<)
-	@$(CC)  $(CFLAGS) -MMD -c $< -o $@
-
-default: $(OBJS)
-	@echo "Linking $(BIN)"
-	@$(CC) -o $(BIN_DIR)$(BIN) $(OBJS) $(LDFLAGS)
-
+$(TARGET):$(OBJS) 
+	@$(ECHO) "[armeabi] Build App  : "$@ 
+	@$(CPP) $^ -o $@ $(LDFLAGS) $(INCLUDE_DIR) $(STATIC_LIB)
+	
+prepare: 
+	@$(ECHO) "[armeabi] GCC            : "$(CC)
+	@$(ECHO) "[armeabi] G++            : "$(CPP)
+	@-$(MKDIR) $(OBJS_DIR_TREE) -p 
+	@-$(RM) $(TARGET) -rf 
+	
 clean:
-	rm build -r
+	@$(ECHO) "[armeabi] Clean          : "$(OBJS_ROOT_DIR) 
+	@-$(RM)  $(OBJS_ROOT_DIR) -rf 
+	@$(ECHO) "[armeabi] Clean          : "$(TARGET)
+	@-$(RM)  $(TARGET) -rf 
+
+.PHONY:all clean prepare $(TARGET)
 

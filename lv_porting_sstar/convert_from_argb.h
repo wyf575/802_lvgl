@@ -272,6 +272,7 @@ int ARGBToNV12(const unsigned char *src_argb,
 
         free_aligned_buffer_64(row_u);
     }
+    return 0;
 }
 // Shuffle table for converting BGRA to ARGB.
 static const unsigned char kShuffleMaskBGRAToARGB[] = {

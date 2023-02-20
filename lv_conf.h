@@ -32,7 +32,7 @@
 /*Enable more complex drawing routines to manage screens transparency.
  *Can be used if the UI is above another layer, e.g. an OSD menu or video player.
  *Requires `LV_COLOR_DEPTH = 32` colors and the screen's `bg_opa` should be set to non LV_OPA_COVER value*/
-#define LV_COLOR_SCREEN_TRANSP 0
+#define LV_COLOR_SCREEN_TRANSP 1
 
 /* Adjust color mix functions rounding. GPUs might calculate color mix (blending) differently.
  * 0: round down, 64: round up from x.75, 128: round up from half, 192: round up from x.25, 254: round up */
@@ -204,7 +204,7 @@
     *LV_LOG_LEVEL_ERROR       Only critical issue, when the system may fail
     *LV_LOG_LEVEL_USER        Only logs added by the user
     *LV_LOG_LEVEL_NONE        Do not log anything*/
-    #define LV_LOG_LEVEL LV_LOG_LEVEL_ERROR
+    #define LV_LOG_LEVEL LV_LOG_LEVEL_INFO
 
     /*1: Print the log with 'printf';
     *0: User need to register a callback with `lv_log_register_print_cb()`*/
@@ -578,9 +578,9 @@
 #endif
 
 /*API for open, read, etc*/
-#define LV_USE_FS_POSIX 0
+#define LV_USE_FS_POSIX 1   
 #if LV_USE_FS_POSIX
-    #define LV_FS_POSIX_LETTER '\0'     /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
+    #define LV_FS_POSIX_LETTER 'A'     /*Set an upper cased letter on which the drive will accessible (e.g. 'A')*/
     #define LV_FS_POSIX_PATH ""         /*Set the working directory. File/directory paths will be appended to it.*/
     #define LV_FS_POSIX_CACHE_SIZE  0   /*>0 to cache this number of bytes in lv_fs_read()*/
 #endif
@@ -602,6 +602,8 @@
 
 /*PNG decoder library*/
 #define LV_USE_PNG 1
+
+#define LV_IMGBTN_TILED  1
 
 /*BMP decoder library*/
 #define LV_USE_BMP 0
@@ -696,7 +698,7 @@
 /*SSTAR GFX ROTATE*/
 #define SSTAR_GFX_ROTATE 0
 #if SSTAR_GFX_ROTATE 
-#define SSTAR_GFX_ROTATE_ANGLE 1 //0:0°  1:90°  2:180°  3:270°
+#define SSTAR_GFX_ROTATE_ANGLE 0 //0:0°  1:90°  2:180°  3:270°
 #endif 
 
 /*--END OF LV_CONF_H--*/

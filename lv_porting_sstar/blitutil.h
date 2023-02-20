@@ -1,3 +1,8 @@
+#ifdef __cplusplus
+extern "C"{
+#endif // __cplusplus
+
+
 #include "mi_gfx_datatype.h"
 
 #define RECTW(r) (r.right-r.left)
@@ -39,3 +44,6 @@ void SstarBlitCW(MI_GFX_DEV GfxDevId, Surface * pSrcSurface, Surface *pDstSurfac
 void SstarBlitHVFlip(MI_GFX_DEV GfxDevId, Surface * pSrcSurface, Surface *pDstSurface, RECT* pRect);
 void SstarBlitNormal(MI_GFX_DEV GfxDevId, Surface * pSrcSurface, Surface *pDstSurface, RECT* pRect);
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus
